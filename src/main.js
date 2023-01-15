@@ -3,7 +3,7 @@ import { createPinia } from 'pinia';
 
 import App from './App.vue';
 import router from './router';
-import { i18n } from './locales';
+import { i18n, swapLocale } from './locales';
 import { registerComponents } from './components';
 
 import './css/styles.css';
@@ -17,3 +17,6 @@ app.use(i18n);
 registerComponents({ app });
 
 app.mount('#app');
+
+const [lang] = (navigator.language || navigator.userLanguage || 'en-us').split('-');
+swapLocale({ lang });
