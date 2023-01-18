@@ -7,7 +7,7 @@
       :disabled="disabled"
       @click.stop="clicked"
   >
-    <base-loading v-if="loading"/>
+    <BaseLoading v-if="loading"/>
     <template v-else>
       {{ labelInAction }}
     </template>
@@ -16,6 +16,7 @@
 
 <script setup>
 import { computed } from 'vue';
+import BaseLoading from './BaseLoading.vue';
 
 const emit = defineEmits(['click']);
 
