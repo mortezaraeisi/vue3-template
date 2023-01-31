@@ -5,6 +5,10 @@
   --q-primary: #ee0707;
 }
 
+.body--light {
+  --q-dark-page: #ececec;
+}
+
 body {
   transition: background-color .3s ease-in-out;
 }

@@ -2,7 +2,7 @@
   <q-layout>
     <q-header bordered class="bg-transparent">
       <q-toolbar>
-        <BaseThemeSwitcher/>
+        <base-theme-switcher/>
       </q-toolbar>
     </q-header>
     <q-page-container>
