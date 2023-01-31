@@ -3,11 +3,12 @@ interface IConf {
   readonly securityWs: string;
 }
 
+declare const settings: object;
+
 let conf: IConf;
 
 export function useConf(): IConf {
   if (!conf) {
-    // eslint-disable-next-line no-undef
     conf = settings as IConf;
   }
 
