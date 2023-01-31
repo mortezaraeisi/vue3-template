@@ -1,1 +1,10 @@
 // app global css in SCSS form
+
+.body--dark {
+  --q-dark: #FFF;
+  --q-primary: #ee0707;
+}
+
+body {
+  transition: background-color .3s ease-in-out;
+}
