@@ -1,32 +1,38 @@
 <template>
   <q-page class="base-page">
-    <base-layout style="min-height: inherit">
-      <template v-if="hasHeader" #header>
-        <div v-if="hasTitle || closable">
-          {{ title }}
-        </div>
-        <slot
-          v-if="hasHeaderSlot"
-          name="header"
-          v-bind="slots.header"
-        ></slot>
-        <template v-if="closable">
-          <div class="q-mx-sm">
-            <q-btn
-              dense
-              round
-              flat
-              icon="fas fa-close"
-              size="10px"
-              @click="closePage"
-            />
+    <base-layout style="min-height: inherit;">
+      <template #top>
+        <div class="base-page__header" v-if="hasHeader">
+          <div v-if="hasTitle || closable">
+            {{ title }}
           </div>
-        </template>
+          <slot
+            v-if="hasHeaderSlot"
+            name="header"
+            v-bind="slots.header"
+          ></slot>
+          <template v-if="closable">
+            <div class="q-mx-sm">
+              <q-btn
+                dense
+                round
+                flat
+                icon="fas fa-close"
+                size="10px"
+                @click="closePage"
+              />
+            </div>
+          </template>
+        </div>
       </template>
 
-      <slot></slot>
+      <div class="fit q-pa-sm">
+        <slot name="before"></slot>
+        <slot></slot>
+        <slot name="after"></slot>
+      </div>
 
-      <template v-if="hasFooterSlot" #footer>
+      <template v-if="hasFooterSlot" #bottom>
         <slot
           name="footer"
           v-bind="slots.footer"
@@ -70,20 +76,17 @@ async function closePage() {
 
 <style lang="scss">
 .base-page {
-  .base-layout {
-    &__header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 8px 2px;
-      height: 38px;
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 2px;
+    height: 38px;
 
-      & > :first-child {
-        flex: 0 0 auto;
-        font-size: 16px;
-        padding: 0 10px 0 5px;
-      }
-
+    & > :first-child {
+      flex: 0 0 auto;
+      font-size: 16px;
+      padding: 0 10px 0 5px;
     }
   }
 }
