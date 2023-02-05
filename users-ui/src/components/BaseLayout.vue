@@ -26,7 +26,6 @@
 
   &__body {
     overflow: auto;
-    background-color: var(--q-dark-page);
     transition: background-color .3s ease-in-out;
   }
 
