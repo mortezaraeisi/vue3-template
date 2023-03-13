@@ -233,7 +233,7 @@ async function load(opt: IGridLoadEventParams) {
 async function selectedRow(row: any) {
   try {
     state.loading = true;
-    await router.push({ name: 'UserInfo', params: { userId: row.NidUser } });
+    await router.push({ name: 'UserInfo', params: { id: row.NidUser } });
   } catch (e) {
     logger.catchError(e);
   } finally {

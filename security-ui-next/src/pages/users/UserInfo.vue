@@ -118,6 +118,7 @@
       <div class="col-span-full mt-2">
         <base-button
           primary
+          class="w-full"
           icon="fa-save"
           type="submit"
           label="ثبت"
@@ -162,7 +163,7 @@
       />
       <div class="flex items-end">
         <base-button
-          secondary
+          primary
           icon="fa-sync"
           label="شناسایی"
           class="w-40"

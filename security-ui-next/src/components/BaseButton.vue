@@ -1,6 +1,6 @@
 <template>
   <button
-    class="w-full flex items-center justify-center border rounded text-sm p-1 transition-all h-9"
+    class="flex items-center justify-center border rounded text-sm p-1 transition-all h-9"
     :class="btnClass"
     :type="type"
     :disabled="disabled"

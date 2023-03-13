@@ -32,7 +32,7 @@ const privateRoutes = [
         component: () => import('../pages/users/UsersList.vue'),
       },
       {
-        path: 'user/:userId',
+        path: 'user/:id',
         name: 'User',
         component: () => import('../pages/users/User.vue'),
         children: [
