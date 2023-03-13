@@ -62,32 +62,32 @@ const tabs = [
     icon: 'fa-people-group'
   },
   {
-    target: 'substitution',
+    target: 'UserSubstitution',
     title: 'جانشین',
     icon: 'fa-person-circle-exclamation'
   },
   {
-    target: 'subsets',
+    target: 'UserSubsets',
     title: 'زیرمجموعه',
     icon: 'fa-diagram-project'
   },
   {
-    target: 'domain',
+    target: 'UserDomain',
     title: 'دامنه',
     icon: 'fa-globe'
   },
   {
-    target: 'permissions',
+    target: 'UserPermissions',
     title: 'دسترسی',
     icon: 'fa-archive'
   },
   {
-    target: 'job-location',
+    target: 'UserJobLocation',
     title: 'محل خدمت',
     icon: 'fa-street-view'
   },
   {
-    target: 'auth-history',
+    target: 'UserAuth',
     title: 'احراز هویت',
     icon: 'fa-user-secret'
   },

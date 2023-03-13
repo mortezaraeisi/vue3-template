@@ -46,6 +46,36 @@ const privateRoutes = [
             name: 'UserMember',
             component: () => import('../pages/users/UserMember.vue'),
           },
+          {
+            path: 'substitution',
+            name: 'UserSubstitution',
+            component: () => import('../pages/users/UserSubstitution.vue'),
+          },
+          {
+            path: 'subsets',
+            name: 'UserSubsets',
+            component: () => import('../pages/users/UserSubsets.vue'),
+          },
+          {
+            path: 'domain',
+            name: 'UserDomain',
+            component: () => import('../pages/users/UserDomain.vue'),
+          },
+          {
+            path: 'permissions',
+            name: 'UserPermissions',
+            component: () => import('../pages/users/UserPermissions.vue'),
+          },
+          {
+            path: 'job-location',
+            name: 'UserJobLocation',
+            component: () => import('../pages/users/UserJobLocation.vue'),
+          },
+          {
+            path: 'auth',
+            name: 'UserAuth',
+            component: () => import('../pages/users/UserAuth.vue'),
+          },
         ]
       },
       {
