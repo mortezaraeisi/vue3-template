@@ -2,7 +2,7 @@
   <section class="base-page relative bg-gray-50">
     <div
       v-if="loading"
-      class="absolute inset-0 bg-gray-500 bg-opacity-30 transition-opacity flex justify-center items-center"
+      class="absolute z-50 inset-0 bg-gray-500 bg-opacity-30 transition-opacity flex justify-center items-center"
     >
       <base-loading style="width: 100px; height: 40px;"/>
     </div>

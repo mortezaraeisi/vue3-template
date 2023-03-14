@@ -1,5 +1,11 @@
 <template>
-  <section class="base-layout">
+  <section class="base-layout relative">
+    <div
+      v-if="isLoading"
+      class="absolute z-50 inset-0 bg-gray-500 bg-opacity-30 transition-opacity flex justify-center items-center"
+    >
+      <base-loading style="width: 100px; height: 40px;"/>
+    </div>
     <div>
       <div v-if="hasHeaderSlot" class="base-layout__top">
         <slot name="header"></slot>
@@ -16,6 +22,9 @@
 
 <script setup lang="ts">
 import { computed, useSlots } from 'vue';
+
+const props = defineProps<{ loading?: boolean | number }>();
+const isLoading = computed(() => !!props.loading);
 
 const slots = useSlots();
 const hasHeaderSlot = computed(() => !!slots.header);
