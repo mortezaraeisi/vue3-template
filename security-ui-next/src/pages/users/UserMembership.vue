@@ -1,7 +1,7 @@
 <template>
   <base-layout :loading="state.loadingCount">
     <div class="w-full grid grid-cols-9">
-      <div class="col-span-full md:col-span-4" style2="height: 5vh">
+      <div class="col-span-full md:col-span-4">
         <base-grid
           multiple
           style="height: 80vh"
@@ -16,14 +16,14 @@
       <div class="col-span-full md:col-span-1 flex md:flex-col items-center justify-center" style="min-height: 60px">
         <base-button
           icon="fa-arrow-left"
-          class="text-primary m-1 rotate-90 md:rotate-0"
+          class="text-primary m-1 fa-rotate-270 md:rotate-0"
           :disabled="!allowA"
           @click="add"
         >
         </base-button>
         <base-button
           icon="fa-arrow-right"
-          class="text-primary m-1 rotate-90 md:rotate-0"
+          class="text-primary m-1 fa-rotate-270 md:rotate-0"
           :disabled="!allowR"
           @click="remove"
         >
