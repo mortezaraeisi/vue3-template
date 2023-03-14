@@ -42,9 +42,9 @@ const privateRoutes = [
             component: () => import('../pages/users/UserInfo.vue'),
           },
           {
-            path: 'member',
-            name: 'UserMember',
-            component: () => import('../pages/users/UserMember.vue'),
+            path: 'membership',
+            name: 'UserMembership',
+            component: () => import('../pages/users/UserMembership.vue'),
           },
           {
             path: 'substitution',

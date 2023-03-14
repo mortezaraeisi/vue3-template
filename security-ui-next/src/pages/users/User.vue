@@ -57,7 +57,7 @@ const tabs = [
     icon: 'fa-info-circle'
   },
   {
-    target: 'UserMember',
+    target: 'UserMembership',
     title: 'گروهها',
     icon: 'fa-people-group'
   },
