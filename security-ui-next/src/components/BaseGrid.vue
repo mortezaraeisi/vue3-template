@@ -1,5 +1,13 @@
 <template>
-  <base-layout class="base-grid bg-white border rounded">
+  <base-layout
+    class="base-grid bg-white border rounded"
+  >
+    <template #header v-if="hasHear">
+      <div class="flex w-full">
+        {{ title }}
+      </div>
+      <slot name="header"></slot>
+    </template>
     <div class="flex flex-col h-full">
       <table class="base-grid__head-table border-b-2" :style="{width: tableWidth + 'px'}">
         <colgroup>
@@ -52,7 +60,7 @@
       </div>
     </div>
     <template #footer v-if="!hidePagination">
-      <div class="flex justify-between items-center p-2 border-t-2 common-text">
+      <div class="flex flex-wrap justify-between items-center p-2 border-t-2 common-text">
         <div>
           {{ paginationReport }}
         </div>
@@ -89,7 +97,7 @@
 <script setup lang="ts">
 
 import { IGridColumn } from '../definitions/IGridColumn';
-import { computed, onMounted, watch } from 'vue';
+import { computed, onMounted, useSlots, watch } from 'vue';
 import { useFilters } from '../composition/use-filters';
 import { usePagination } from '../composition/use-pagination';
 import { IGridLoadEventParams } from '../definitions/IGridLoadEventParams';
@@ -99,6 +107,7 @@ interface IProps {
   columns: Array<IGridColumn>
   selected?: Array<any>
   keyField?: string,
+  title?: string,
   search?: string,
   filter?: Array<any>
   multiple?: boolean
@@ -121,9 +130,11 @@ const props = withDefaults(defineProps<IProps>(), {
   sortMultipleColumn: false,
 });
 const emits = defineEmits([ 'load', 'update:selected' ]);
+const slots = useSlots();
 const filters = useFilters();
 const pagination = usePagination();
 
+const hasHear = computed(() => !!props.title || !!slots.header);
 const columns = computed(() => {
   const lst = [ ...props.columns ];
   lst.unshift({

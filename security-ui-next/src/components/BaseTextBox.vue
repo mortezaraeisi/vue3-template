@@ -20,6 +20,7 @@
         v-else
         ref="theInput"
         class="w-full bg-white dark:bg-black dark:text-red-500 text-sm outline-0 border-0 rounded p-1"
+        v-bind="$attrs"
         :type="type"
         :readonly="readonly"
         :value="modelValue"
