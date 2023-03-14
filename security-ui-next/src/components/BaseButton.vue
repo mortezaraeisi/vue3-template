@@ -6,7 +6,7 @@
     :disabled="disabled"
     @click.stop="clicked"
   >
-    <base-icon v-if="hasIcon" :name="icon" class="ml-2"/>
+    <base-icon v-if="hasIcon" :name="icon" class="m-2"/>
     <base-loading v-if="loading"/>
     <template v-else>
       {{ labelInAction }}
@@ -41,16 +41,18 @@ const labelInAction = computed(() => {
 const hasIcon = computed(() => !!props.icon);
 
 const btnClass = computed(() => {
-  if (props.primary) {
-    return 'bg-blue-500 text-white hover:bg-blue-600 dark:bg-red-500 dark:border-red-600 dark:hover:bg-red-600';
-  }
-  if (props.negative) {
-    return 'bg-red-500 text-white hover:bg-red-600 dark:bg-blue-500 dark:border-blue-600 dark:hover:bg-blue-600';
-  }
-  if (props.secondary) {
-    return 'dark:text-red-500 dark:border-red-500 dark:hover:bg-red-300 dark:hover:text-black';
-  }
-  return 'hover:border-blue-300 dark:hover:bg-red-300 dark:border-red-500';
+  const defClass = !props.primary && !props.negative && !props.secondary;
+  return {
+    'bg-blue-500 text-white dark:bg-red-500 dark:border-red-600': props.primary,
+    'over:bg-blue-600 dark:hover:bg-red-600': !props.disabled && props.primary,
+    'bg-red-500 text-white hover:bg-red-600 dark:bg-blue-500 dark:border-blue-600': props.negative,
+    'hover:bg-red-600 dark:hover:bg-blue-600': !props.disabled && props.negative,
+    'dark:text-red-500 dark:border-red-500': props.secondary,
+    'dark:hover:bg-red-300 dark:hover:text-black': !props.disabled && props.secondary,
+    'dark:border-red-500': defClass,
+    'hover:border-blue-300 dark:hover:bg-red-300 ': !props.disabled && defClass,
+    'opacity-60': props.disabled,
+  };
 });
 
 function clicked() {
