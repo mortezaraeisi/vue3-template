@@ -9,6 +9,10 @@ export class PersianDate extends Date {
     return super.toLocaleDateString('fa-IR-u-nu-latn');
   }
 
+  toPersianDateString() {
+    return this.toLocaleDateString();
+  }
+
   getParts() {
     return this.toLocaleDateString().split('/').map(Number);
   }
@@ -35,6 +39,20 @@ export class PersianDate extends Date {
 
   getDayName() {
     return super.toLocaleDateString('fa-IR', { weekday: 'long' });
+  }
+
+  isPersianLeapYer(year: number = this.getYear()): boolean {
+    return ((((((year - ((year > 0) ? 474 : 473)) % 2820) + 474) + 38) * 682) % 2816) < 682;
+  }
+
+  getDaysInMonth(year: number = this.getYear(), month: number = this.getMonth()) {
+    if (month <= 6) {
+      return 31;
+    }
+    if (month <= 11) {
+      return 30;
+    }
+    return this.isPersianLeapYer(year) ? 30 : 29;
   }
 
   static fromString(date = '') {
