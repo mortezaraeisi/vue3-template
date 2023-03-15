@@ -15,7 +15,31 @@
           <base-icon name="fa-calendar"/>
         </div>
       </template>
-      <template #append v-if="clearable">
+      <template #append>
+        <div
+          class="px-2 flex items-center border"
+          @click.stop
+        >
+          <input
+            type="number"
+            min="0"
+            max="59"
+            class="w-12 text-center"
+            title="دقیقه"
+            v-model.number="state.minute"
+            @input="updateTime"
+          >
+          <div class="mx-1">:</div>
+          <input
+            type="number"
+            min="0"
+            max="23"
+            class="w-12 text-center"
+            title="ساعت"
+            v-model.number="state.hour"
+            @input="updateTime"
+          >
+        </div>
         <div
           class="px-2 flex items-center cursor-pointer hover:text-primary"
           @click.stop="clearDate"
@@ -60,14 +84,13 @@
         >
           {{ day.dayOfMonth }}
         </div>
-
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive } from 'vue';
+import { computed, onMounted, reactive, watch } from 'vue';
 import { PersianDate } from '../utils/persian-date';
 
 interface IProps {
@@ -80,6 +103,7 @@ interface IProps {
   upwardDays?: boolean | number
   lengthDays?: boolean | number
   allowHolidays?: boolean
+  allowTime?: boolean
 }
 
 interface ICalendarDay {
@@ -120,7 +144,9 @@ const state = reactive({
   dayName: '',
   dList: [] as Array<ICalendarDay>,
   popupState: false,
-  txtInput: ''
+  txtInput: '',
+  hour: 0,
+  minute: 0,
 });
 
 const lowBoundDate = computed(() => {
@@ -195,6 +221,10 @@ const dList = computed(() => {
   return startWeek.concat(dList);
 });
 
+watch(() => props.modelValue, () => {
+  state.txtInput = (props.modelValue || '').split(' ')[0];
+});
+
 function moveToNextMonth() {
   moveMonth(+1);
 }
@@ -232,6 +262,9 @@ function updateFromString() {
 }
 
 function clearDate() {
+  state.hour = 0;
+  state.minute = 0;
+  state.popupState = false;
   changeDate('');
 }
 
@@ -246,16 +279,22 @@ function selectDay(day: ICalendarDay) {
   togglePopup();
 }
 
+function updateTime() {
+  changeDate(state.txtInput);
+}
+
 function changeDate(val: string) {
   if (val) {
     setDate(val);
   }
-  emits('update:modelValue', val);
+  const time = (state.hour || 0).toString().padStart(2, '20') + ':' + (state.minute || 0).toString().padStart(2, '20');
+  const outVal = props.allowTime ? val + ' ' + time : val;
+  emits('update:modelValue', outVal);
 }
 
 function setDate(persianDate: string) {
   state.current = persianDate;
 }
 
-onMounted(() => setDate('1401/12/24'));
+onMounted(() => setDate(today));
 </script>
