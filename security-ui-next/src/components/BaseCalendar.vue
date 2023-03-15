@@ -2,9 +2,13 @@
   <div class=" relative">
     <base-text-box
       class="cursor-pointer"
+      input-class="text-center"
       v-bind="$attrs"
       :label="label"
       :model-value="modelValue"
+      v-model="state.txtInput"
+      @keydown.enter.stop="updateFromString"
+      @click="togglePopup"
     >
       <template #prepend>
         <div class="px-2 flex items-center">
@@ -20,8 +24,10 @@
         </div>
       </template>
     </base-text-box>
-
-    <div class="absolute z-10 w-full h-auto bg-white border top-12 p-1">
+    <div
+      v-if="state.popupState"
+      class="absolute z-10 w-full h-auto bg-white border top-12 p-1"
+    >
       <div class="w-full grid grid-cols-7 gap-1">
         <div class="col-span-full text-center flex">
           <div
@@ -31,7 +37,7 @@
             <base-icon name="fa-caret-right"/>
           </div>
           <div class="flex-1">
-            {{ modelValue }}
+            {{ state.current }}
           </div>
           <div
             class="w-10 cursor-pointer hover:bg-gray-50 hover:text-primary"
@@ -47,7 +53,7 @@
           {{ name }}
         </div>
         <div
-          v-for="day in state.dList" :key="day.dayOfMonth"
+          v-for="day in dList" :key="day.dayOfMonth"
           class="select-none"
           :class="day.classes"
           @click.stop="selectDay(day)"
@@ -61,7 +67,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, watch } from 'vue';
+import { computed, onMounted, reactive } from 'vue';
 import { PersianDate } from '../utils/persian-date';
 
 interface IProps {
@@ -112,7 +118,9 @@ const state = reactive({
   startWeekDay: 0,
   monthName: '',
   dayName: '',
-  dList: [] as Array<ICalendarDay>
+  dList: [] as Array<ICalendarDay>,
+  popupState: false,
+  txtInput: ''
 });
 
 const lowBoundDate = computed(() => {
@@ -139,49 +147,8 @@ const upBoundDate = computed(() => {
   return props.maxDate ?? '';
 });
 
-function moveToNextMonth() {
-  moveMonth(+1);
-}
-
-function moveToPrevMonth() {
-  moveMonth(-1);
-}
-
-function moveMonth(count: number) {
-  const dt = PersianDate.fromString(state.current).asDate();
-  dt.setMonth(dt.getMonth() + count);
-  const pDate = new PersianDate(dt).toPersianDateString();
-  if (lowBoundDate.value && pDate < lowBoundDate.value) {
-    return;
-  }
-  if (upBoundDate.value && pDate > upBoundDate.value) {
-    return;
-  }
-  setDate(pDate);
-}
-
-function clearDate() {
-  changeDate('');
-}
-
-function selectDay(day: ICalendarDay) {
-  if (!day.isSelectable) {
-    return;
-  }
-  if (day.date === state.current) {
-    return;
-  }
-  changeDate(day.date);
-}
-
-function changeDate(val: string) {
-  // state.current = val;
-  setDate(val);
-  emits('update:modelValue', val);
-}
-
-function setDate(persianDate: string) {
-  const originDate = PersianDate.fromString(persianDate);
+const dList = computed(() => {
+  const originDate = PersianDate.fromString(state.current);
   state.current = originDate.toPersianDateString();
   state.daysInMonth = originDate.getDaysInMonth();
   const [ year, month ] = state.current.split('/');
@@ -225,9 +192,70 @@ function setDate(persianDate: string) {
       isToday: false,
       classes: 'text-normal bg-gray-50'
     } as ICalendarDay));
-  state.dList = startWeek.concat(dList);
+  return startWeek.concat(dList);
+});
+
+function moveToNextMonth() {
+  moveMonth(+1);
 }
 
+function moveToPrevMonth() {
+  moveMonth(-1);
+}
+
+function moveMonth(count: number) {
+  const dt = PersianDate.fromString(state.current).asDate();
+  dt.setMonth(dt.getMonth() + count);
+  const pDate = new PersianDate(dt).toPersianDateString();
+  if (lowBoundDate.value && pDate < lowBoundDate.value) {
+    return;
+  }
+  if (upBoundDate.value && pDate > upBoundDate.value) {
+    return;
+  }
+  setDate(pDate);
+}
+
+function togglePopup() {
+  state.popupState = !state.popupState;
+}
+
+function updateFromString() {
+  if (!state.txtInput || typeof state.txtInput !== 'string') {
+    return;
+  }
+  const parts = state.txtInput.split('/').map(Number);
+  if (parts.length !== 3 || parts.some(x => !x || isNaN(x) || !isFinite(x))) {
+    return;
+  }
+  changeDate(parts.map(x => x.toString().padStart(2, '0')).join('/'));
+}
+
+function clearDate() {
+  changeDate('');
+}
+
+function selectDay(day: ICalendarDay) {
+  if (!day.isSelectable) {
+    return;
+  }
+  if (day.date === state.current) {
+    return;
+  }
+  changeDate(day.date);
+  togglePopup();
+}
+
+function changeDate(val: string) {
+  if (val) {
+    setDate(val);
+  }
+  emits('update:modelValue', val);
+}
+
+function setDate(persianDate: string) {
+  state.current = persianDate;
+}
 
 onMounted(() => setDate('1401/12/24'));
 </script>
