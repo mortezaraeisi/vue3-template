@@ -1,5 +1,5 @@
 <template>
-  <div class=" relative">
+  <div class=" relative" @click.stop..prevent>
     <base-text-box
       class="cursor-pointer"
       input-class="text-center"
@@ -17,6 +17,7 @@
       </template>
       <template #append>
         <div
+          v-if="allowTime"
           class="px-2 flex items-center border"
           @click.stop
         >
@@ -41,6 +42,7 @@
           >
         </div>
         <div
+          v-if="clearable"
           class="px-2 flex items-center cursor-pointer hover:text-primary"
           @click.stop="clearDate"
         >
@@ -72,7 +74,7 @@
         </div>
         <div
           v-for="name in dNames" :key="name"
-          class="text-normal text-center select-none"
+          class="text-normal text-center select-none overflow-hidden"
         >
           {{ name }}
         </div>
@@ -90,7 +92,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, watch } from 'vue';
+import { computed, onMounted, onUnmounted, reactive, watch } from 'vue';
 import { PersianDate } from '../utils/persian-date';
 
 interface IProps {
@@ -296,5 +298,16 @@ function setDate(persianDate: string) {
   state.current = persianDate;
 }
 
-onMounted(() => setDate(today));
+function clickedOutside() {
+  state.popupState = false;
+}
+
+onMounted(() => {
+  setDate(today);
+  document.addEventListener('click', clickedOutside);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', clickedOutside);
+});
 </script>
