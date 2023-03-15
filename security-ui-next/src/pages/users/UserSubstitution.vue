@@ -30,11 +30,15 @@
           />
           <base-calendar
             required
+            allow-time
+            allow-holidays
             label="زمان شروع"
             v-model="dm.StartDate"
           />
           <base-calendar
             required
+            allow-time
+            allow-holidays
             label="زمان پایان"
             v-model="dm.EndDate"
           />
@@ -169,11 +173,13 @@ const histColumns: Array<IGridColumn> = [
     title: 'از تاریخ',
     width: 150,
     sortable: true,
+    filter: 'datetime',
   },
   {
     field: 'EndDate',
     title: 'تا تاریخ',
     width: 150,
+    filter: 'datetime',
   },
   {
     field: 'Description',
@@ -190,11 +196,13 @@ const histColumns: Array<IGridColumn> = [
     field: 'createdAt',
     title: 'ایجاد',
     width: 200,
+    filter: 'datetime',
   },
   {
     field: 'updatedAt',
     title: 'بروزرسانی',
     width: 200,
+    filter: 'datetime',
   },
   {
     field: 'actions',
@@ -282,7 +290,7 @@ async function save() {
     if (hasError) {
       return;
     }
-    await load({ from: 0, to: 20, search: '' } as IGridLoadEventParams);
+    await load({ from: 1, to: 20, search: '' } as IGridLoadEventParams);
   } catch (e) {
     logger.catchError(e);
   } finally {
