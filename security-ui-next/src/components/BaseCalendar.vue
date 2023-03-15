@@ -1,28 +1,233 @@
 <template>
-  <label class="flex-col">
-    <span class="text-normal mr-2">
-    {{ label }}
-    </span>
-    <input
-      class="w-full"
-      type="datetime-local"
+  <div class=" relative">
+    <base-text-box
+      class="cursor-pointer"
       v-bind="$attrs"
-      :checked="modelValue"
-      @input="valueChanged"
+      :label="label"
+      :model-value="modelValue"
     >
-  </label>
+      <template #prepend>
+        <div class="px-2 flex items-center">
+          <base-icon name="fa-calendar"/>
+        </div>
+      </template>
+      <template #append v-if="clearable">
+        <div
+          class="px-2 flex items-center cursor-pointer hover:text-primary"
+          @click.stop="clearDate"
+        >
+          <base-icon name="fa-xmark"/>
+        </div>
+      </template>
+    </base-text-box>
+
+    <div class="absolute z-10 w-full h-auto bg-white border top-12 p-1">
+      <div class="w-full grid grid-cols-7 gap-1">
+        <div class="col-span-full text-center flex">
+          <div
+            class="w-10 cursor-pointer hover:bg-gray-50 hover:text-primary"
+            @click.stop="moveToPrevMonth"
+          >
+            <base-icon name="fa-caret-right"/>
+          </div>
+          <div class="flex-1">
+            {{ modelValue }}
+          </div>
+          <div
+            class="w-10 cursor-pointer hover:bg-gray-50 hover:text-primary"
+            @click.stop="moveToNextMonth"
+          >
+            <base-icon name="fa-caret-left"/>
+          </div>
+        </div>
+        <div
+          v-for="name in dNames" :key="name"
+          class="text-normal text-center select-none"
+        >
+          {{ name }}
+        </div>
+        <div
+          v-for="day in state.dList" :key="day.dayOfMonth"
+          class="select-none"
+          :class="day.classes"
+          @click.stop="selectDay(day)"
+        >
+          {{ day.dayOfMonth }}
+        </div>
+
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
+import { computed, onMounted, reactive, watch } from 'vue';
+import { PersianDate } from '../utils/persian-date';
 
-const emits = defineEmits([ 'update:modelValue' ]);
-const props = withDefaults(defineProps<{ modelValue?: string, label?: string }>(), {
-  modelValue: undefined,
-  label: undefined,
-});
-
-function valueChanged(e: any) {
-  // emits('update:modelValue', e.target.checked);
+interface IProps {
+  modelValue?: string,
+  label?: string,
+  maxDate?: string,
+  minDate?: string,
+  readonly?: boolean
+  clearable?: boolean
+  upwardDays?: boolean | number
+  lengthDays?: boolean | number
+  allowHolidays?: boolean
 }
 
+interface ICalendarDay {
+  isFriday: boolean
+  isHoliday: boolean
+  date: string,
+  classes: string | object,
+  dayOfMonth: number | string,
+  holidayInCalendar: boolean
+  isSelectable: boolean
+  isSelected: boolean
+  isToday: boolean
+}
+
+const emits = defineEmits([ 'update:modelValue' ]);
+const props = defineProps<IProps>();
+
+const persianDate = new PersianDate();
+const today = new PersianDate().toPersianDateString();
+const dNames = [
+  'شنبه',
+  'یکشنبه',
+  'دوشنبه',
+  'سه‌شنبه',
+  'چهارشنبه',
+  'پنجشنبه',
+  'جمعه',
+];
+
+const state = reactive({
+  current: persianDate.toLocaleDateString(),
+  year: 1400,
+  month: 1,
+  day: 1,
+  daysInMonth: 31,
+  startWeekDay: 0,
+  monthName: '',
+  dayName: '',
+  dList: [] as Array<ICalendarDay>
+});
+
+const lowBoundDate = computed(() => {
+  if (props.upwardDays) {
+    if (props.upwardDays === true) {
+      return state.current;
+    }
+    const upwardDays = Number(props.upwardDays) || 0;
+    const dt = new Date();
+    return new PersianDate(dt.setDate(dt.getDate() + upwardDays)).toLocaleDateString();
+  }
+  return props.minDate ?? '';
+});
+
+const upBoundDate = computed(() => {
+  if (props.lengthDays) {
+    if (props.lengthDays === true) {
+      return state.current;
+    }
+    const lengthDays = Number(props.lengthDays) || 0;
+    const dt = new Date();
+    return new PersianDate(dt.setDate(dt.getDate() + lengthDays)).toLocaleDateString();
+  }
+  return props.maxDate ?? '';
+});
+
+function moveToNextMonth() {
+  moveMonth(+1);
+}
+
+function moveToPrevMonth() {
+  moveMonth(-1);
+}
+
+function moveMonth(count: number) {
+  const dt = PersianDate.fromString(state.current).asDate();
+  dt.setMonth(dt.getMonth() + count);
+  const pDate = new PersianDate(dt).toPersianDateString();
+  if (lowBoundDate.value && pDate < lowBoundDate.value) {
+    return;
+  }
+  if (upBoundDate.value && pDate > upBoundDate.value) {
+    return;
+  }
+  setDate(pDate);
+}
+
+function clearDate() {
+  changeDate('');
+}
+
+function selectDay(day: ICalendarDay) {
+  if (!day.isSelectable) {
+    return;
+  }
+  if (day.date === state.current) {
+    return;
+  }
+  changeDate(day.date);
+}
+
+function changeDate(val: string) {
+  // state.current = val;
+  setDate(val);
+  emits('update:modelValue', val);
+}
+
+function setDate(persianDate: string) {
+  const originDate = PersianDate.fromString(persianDate);
+  state.current = originDate.toPersianDateString();
+  state.daysInMonth = originDate.getDaysInMonth();
+  const [ year, month ] = state.current.split('/');
+  const fdm = originDate.getFirstOfMonth().getDay();
+  const dList = Array(state.daysInMonth).fill(0)
+    .map((_, i) => {
+      const isFriday = (fdm + i + 1) % 7 === 0;
+      const holidayInCalendar = false;
+      const isHoliday = isFriday || !!holidayInCalendar;
+      const dayOfMonth = (i + 1).toString().padStart(2, '0');
+      const date = `${ year }/${ month }/${ dayOfMonth }`;
+      const isSelectable = (props.allowHolidays || !isHoliday);
+      const isSelected = props.modelValue === date;
+      const isToday = today === date;
+
+      return {
+        date,
+        isFriday,
+        isHoliday,
+        dayOfMonth,
+        isSelectable,
+        isSelected,
+        isToday,
+        holidayInCalendar: holidayInCalendar,
+        classes: {
+          'text-sm text-center border cursor-pointer': true,
+          'hover:bg-primary hover:text-white': isSelectable,
+          'bg-red-100 text-red-800': isFriday,
+          'bg-primary text-white': isSelected,
+          'border-green-800': isToday,
+        }
+      } as ICalendarDay;
+    });
+  const startWeek = Array(fdm).fill(0)
+    .map(() => ({
+      isFriday: false,
+      isHoliday: false,
+      date: '',
+      dayOfMonth: '',
+      isSelectable: false,
+      isToday: false,
+      classes: 'text-normal bg-gray-50'
+    } as ICalendarDay));
+  state.dList = startWeek.concat(dList);
+}
+
+
+onMounted(() => setDate('1401/12/24'));
 </script>

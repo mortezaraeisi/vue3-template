@@ -6,7 +6,7 @@ export class PersianDate extends Date {
   }
 
   toLocaleDateString() {
-    return super.toLocaleDateString('fa-IR-u-nu-latn');
+    return super.toLocaleDateString('fa-IR-u-nu-latn').split('/').map(x => x.padStart(2, '0')).join('/');
   }
 
   toPersianDateString() {
@@ -45,7 +45,7 @@ export class PersianDate extends Date {
     return ((((((year - ((year > 0) ? 474 : 473)) % 2820) + 474) + 38) * 682) % 2816) < 682;
   }
 
-  getDaysInMonth(year: number = this.getYear(), month: number = this.getMonth()) {
+  getDaysInMonth(year: number = this.getYear(), month: number = this.getMonth() + 1) {
     if (month <= 6) {
       return 31;
     }
@@ -53,6 +53,14 @@ export class PersianDate extends Date {
       return 30;
     }
     return this.isPersianLeapYer(year) ? 30 : 29;
+  }
+
+  getFirstOfMonth(year: number = this.getYear(), month: number = this.getMonth() + 1) {
+    return PersianDate.fromString(`${ year }/${ month }/1`);
+  }
+
+  asDate() {
+    return new Date(this)
   }
 
   static fromString(date = '') {

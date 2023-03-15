@@ -53,6 +53,8 @@ import {
   faPeopleGroup,
   faPersonCircleExclamation,
   faUserSecret,
+  faCalendar,
+  faXmark,
 
 } from '@fortawesome/free-solid-svg-icons';
 
@@ -120,6 +122,8 @@ library.add(
   faPeopleGroup,
   faPersonCircleExclamation,
   faUserSecret,
+  faCalendar,
+  faXmark,
 
   // free brands
   faWindows,
