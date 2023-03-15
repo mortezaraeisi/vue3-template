@@ -6,25 +6,30 @@
     <div
       class="flex flex-nowrap rounded border dark:border-red-500 transition-all"
       :class="{'border-red-500': hasError, 'opacity-50': readonly}"
+      @click="onClick"
     >
       <slot name="prepend"></slot>
       <textarea
         v-if="isTextArea"
         ref="theInput"
         class="basis-full bg-white dark:bg-black dark:text-red-500 text-sm outline-0 border-0 rounded p-1"
+        :class="inputClass"
         :readonly="readonly"
         :value="modelValue"
         @input="onValue"
+        @click="onClick"
       />
       <input
         v-else
         ref="theInput"
         class="w-full bg-white dark:bg-black dark:text-red-500 text-sm outline-0 border-0 rounded p-1"
+        :class="inputClass"
         v-bind="$attrs"
         :type="type"
         :readonly="readonly"
         :value="modelValue"
         @input="onValue"
+        @click="onClick"
       >
       <slot name="append"></slot>
     </div>
@@ -43,17 +48,20 @@ import { useValidation } from '../composition/use-validation';
 
 const { validationErrorMsg, hasValidationError } = useValidation('theInput');
 
-const emits = defineEmits([ 'update:modelValue' ]);
-const props = defineProps({
-  debounce: Boolean,
-  error: String,
-  label: String,
-  ltr: Boolean,
-  readonly: Boolean,
-  required: Boolean,
-  type: String,
-  modelValue: [ String, Number, Array ],
-});
+interface IProps {
+  debounce?: boolean
+  error?: string
+  label?: string
+  ltr?: boolean
+  readonly?: boolean
+  required?: boolean,
+  type?: string,
+  inputClass?: string | object,
+  modelValue: string | number | Array<any>,
+}
+
+const emits = defineEmits([ 'update:modelValue', 'click' ]);
+const props = defineProps<IProps>();
 
 const isTextArea = computed(() => props.type === 'textarea');
 const hasLabel = computed(() => !!props.label);
@@ -73,6 +81,10 @@ function onValue(evt: any) {
   } else {
     emits('update:modelValue', value);
   }
+}
+
+function onClick() {
+  emits('click');
 }
 </script>
 
