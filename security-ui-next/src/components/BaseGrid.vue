@@ -1,6 +1,7 @@
 <template>
   <base-layout
     class="base-grid bg-white border rounded"
+    @click="closeFilterDialog"
   >
     <template #header v-if="hasHear">
       <div class="flex flex-row flex-wrap items-center w-full p-2">
@@ -19,7 +20,7 @@
             >
           </label>
         </div>
-        <div class="relative" v-if="filterState.showFilter">
+        <div class="relative" v-if="filterState.showFilter" @click.stop>
           <button
             style="border-radius: 50%; height: 22px; width: 22px;"
             class="bg-primary text-white hover:bg-white hover:text-primary hover:shadow transition-all"
@@ -38,7 +39,7 @@
             >
               <div class="flex-1 shrink-0"> {{ f.title }}</div>
               <input
-                class="border outline-primary h-6"
+                class="border outline-primary p-1 h-6"
                 :type="f.inputType"
                 v-model="f.value"
                 @keydown.enter="doFilter"
@@ -313,7 +314,7 @@ const filterCols = computed(() => {
     type: x.type ?? 'string',
     allowOp: x.type !== 'boolean',
     operand: x.type === 'boolean' ? 'eq' : 'in',
-    inputType: x.type === 'boolean' ? 'checkbox' : 'text',
+    inputType: x.type === 'boolean' ? 'checkbox' : 'search',
     value: undefined,
   }))
     .sort((x, y) => {
@@ -426,12 +427,11 @@ function getFieldValue(row: object, col: IGridColumn) {
   return fieldValue ?? '-';
 }
 
-function load() {
+function getLoadEventParams(): IGridLoadEventParams {
   const currentPage = pagination.currentPage.value || 1;
   const from = (currentPage - 1) * pagination.rowsPerPage.value + 1;
   const to = currentPage * pagination.rowsPerPage.value;
-
-  const payload: IGridLoadEventParams = {
+  return {
     page: pagination.currentPage.value,
     search: filterState.search,
     filter: filterState.filters,
@@ -439,7 +439,6 @@ function load() {
     from,
     to,
   };
-  emits('load', payload);
 }
 
 function rowClicked(row: any) {
@@ -477,6 +476,10 @@ function toggleFilterDialog() {
   filterState.dialog = !filterState.dialog;
 }
 
+function load() {
+  emits('load', getLoadEventParams());
+}
+
 function doFilter() {
   const filters = filterCols.value.filter(x => x.value).map(x => [ x.field, x.value, x.operand ]);
   const query = filterState.isAnd ? filters : [ filters ];
@@ -493,15 +496,15 @@ function clearFilter() {
 }
 
 function download() {
-  emits('download');
+  emits('download', getLoadEventParams());
 }
 
 function upload() {
-  emits('upload');
+  emits('upload', getLoadEventParams());
 }
 
 function add() {
-  emits('add');
+  emits('add', getLoadEventParams());
 }
 
 </script>
