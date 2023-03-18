@@ -3,10 +3,74 @@
     class="base-grid bg-white border rounded"
   >
     <template #header v-if="hasHear">
-      <div class="flex w-full">
-        {{ title }}
+      <div class="flex flex-row flex-wrap w-full p-2">
+        <div class="flex-1"> {{ title }}</div>
+        <div class="flex-1">
+          <slot name="header"></slot>
+        </div>
+        <div class=" relative" v-if="filterState.showFilter">
+          <button
+            style="border-radius: 50%; height: 22px; width: 22px;"
+            class="bg-primary text-white hover:bg-white hover:text-primary hover:outline-1 transition-all"
+            @click="toggleFilterDialog"
+          >
+            <base-icon name="fa-filter" class="text-xs"/>
+          </button>
+          <div
+            v-if="filterState.dialog"
+            class="absolute left-1 grid grid-cols-1 gap-1 bg-white rounded border p-2 w-80"
+          >
+            <label
+              v-for="f in filterCols" :key="f.field"
+              class="text-normal flex flex-row "
+            >
+              <div class="flex-1 shrink-0"> {{ f.title }}</div>
+              <input
+                class="border outline-primary h-6"
+                :type="f.inputType"
+                v-model="f.value"
+                @keydown.enter="doFilter"
+              >
+              <select v-if="f.allowOp" v-model="f.operand">
+                <option
+                  v-for="op in operands" :key="op.title"
+                  :id="op.key"
+                  :value="op.key"
+                  :selected="op.key === f.operand"
+                >
+                  {{ op.title }}
+                </option>
+              </select>
+            </label>
+            <div class="flex flex-row items-center justify-center mt-2 text-normal">
+              <label class="flex flex-row items-center">
+                <input type="radio" class="mx-1" :value="true" v-model="filterState.isAnd">
+                همه
+              </label>
+              <label class="flex flex-row items-center">
+                <input type="radio" class="mx-1" :value="false" v-model="filterState.isAnd">
+                برخی
+              </label>
+            </div>
+            <div class="grid grid-cols-2 gap-2 mt-2">
+              <base-button
+                primary
+                class="h-6"
+                icon="fa-filter"
+                label="بگرد"
+                @click="doFilter"
+              />
+              <base-button
+                secondary
+                class="h-6"
+                icon="fa-trash"
+                label="بازنشانی"
+                @click="clearFilter"
+              />
+            </div>
+          </div>
+        </div>
       </div>
-      <slot name="header"></slot>
     </template>
     <div class="flex flex-col h-full">
       <table class="base-grid__head-table border-b-2" :style="{width: tableWidth + 'px'}">
@@ -97,7 +161,7 @@
 <script setup lang="ts">
 
 import { IGridColumn } from '../definitions/IGridColumn';
-import { computed, onMounted, useSlots, watch } from 'vue';
+import { computed, onMounted, reactive, ref, useSlots, watch } from 'vue';
 import { useFilters } from '../composition/use-filters';
 import { usePagination } from '../composition/use-pagination';
 import { IGridLoadEventParams } from '../definitions/IGridLoadEventParams';
@@ -130,11 +194,42 @@ const props = withDefaults(defineProps<IProps>(), {
   sortMultipleColumn: false,
 });
 const emits = defineEmits([ 'load', 'update:selected' ]);
+const operands = [
+  {
+    key: 'in',
+    title: '%',
+  },
+  {
+    key: 'eq',
+    title: '=',
+  },
+  {
+    key: 'ne',
+    title: '!=',
+  },
+  {
+    key: 'gt',
+    title: '>',
+  },
+  {
+    key: 'gte',
+    title: '>=',
+  },
+  {
+    key: 'lt',
+    title: '<',
+  },
+  {
+    key: 'lte',
+    title: '<=',
+  },
+];
+
 const slots = useSlots();
 const filters = useFilters();
 const pagination = usePagination();
 
-const hasHear = computed(() => !!props.title || !!slots.header);
+const hasHear = computed(() => !!props.title || !!slots.header || filterCols.value.length > 0);
 const columns = computed(() => {
   const lst = [ ...props.columns ];
   lst.unshift({
@@ -159,6 +254,28 @@ const columns = computed(() => {
       ...x.style,
     },
   }));
+});
+const filterCols = computed(() => {
+  return props.columns.filter(x => x.filterable).map(x => ({
+    ...x,
+    type: x.type ?? 'string',
+    allowOp: x.type !== 'boolean',
+    operand: x.type === 'boolean' ? 'eq' : 'in',
+    inputType: x.type === 'boolean' ? 'checkbox' : 'text',
+    value: undefined,
+  }))
+    .sort((x, y) => {
+      if (x.type === y.type) {
+        return x.title < y.title ? 1 : -1;
+      }
+      return x.type < y.type ? 1 : -1;
+    });
+});
+const filterState = reactive({
+  isAnd: true,
+  dialog: false,
+  showFilter: filterCols.value.length > 0,
+  filters: [] as Array<Array<any>>,
 });
 
 const tableWidth = computed(() => {
@@ -264,7 +381,7 @@ function load() {
   const payload: IGridLoadEventParams = {
     page: pagination.currentPage.value,
     search: props.search,
-    filter: props.filter,
+    filter: filterState.filters,
     totalRecords: props.totalRecords,
     from,
     to,
@@ -299,6 +416,32 @@ function changePage(page: number | string) {
   load();
 }
 
+function openFilterDialog() {
+  filterState.dialog = true;
+}
+
+function closeFilterDialog() {
+  filterState.dialog = false;
+}
+
+function toggleFilterDialog() {
+  filterState.dialog = !filterState.dialog;
+}
+
+function doFilter() {
+  const filters = filterCols.value.filter(x => x.value).map(x => [ x.field, x.value, x.operand ]);
+  const query = filterState.isAnd ? filters : [ filters ];
+  filterState.filters = query as Array<Array<any>>;
+  pagination.setCurrentPage(1);
+  load();
+  closeFilterDialog();
+}
+
+function clearFilter() {
+  filterCols.value.forEach(x => x.value = undefined);
+  filterState.isAnd = true;
+  doFilter();
+}
 </script>
 
 <style lang="scss">
