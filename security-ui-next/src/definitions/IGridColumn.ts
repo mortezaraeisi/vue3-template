@@ -1,3 +1,17 @@
+export type CellType =
+  'string'
+  | 'boolean'
+  | 'date'
+  | 'datetime'
+  | 'user'
+  | 'group'
+  | 'role'
+  | 'mobile'
+  | 'domain'
+  | 'resource'
+  | 'workspace'
+  | 'apiKey';
+
 export interface IGridColumn {
   field: string,
   title: string,
@@ -7,5 +21,7 @@ export interface IGridColumn {
   style?: Partial<CSSStyleDeclaration>,
   filter?: string,
   mapper?: string | Function,
-  sortable?: boolean
+  sortable?: boolean,
+  type?: CellType
+  filterable?: boolean
 }

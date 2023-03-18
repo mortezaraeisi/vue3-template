@@ -167,5 +167,6 @@ export function useFilters() {
     localDate,
     jobLocation,
     apiKey,
+    datetime,
   };
 }

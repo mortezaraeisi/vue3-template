@@ -52,7 +52,7 @@
               class="text-normal"
               :style="col.cellStyle"
             >
-              {{ row['$val_' + col.field] }}
+              <component v-html="row['$val_' + col.field]"/>
             </td>
           </tr>
           </tbody>
@@ -222,19 +222,38 @@ function getFieldValue(row: object, col: IGridColumn) {
     .split('.')
     .reduce((acc: any, x) => (acc ?? {})[x], origin);
 
-  let v;
+  let fieldValue;
   if (typeof col.mapper === 'function') {
-    v = col.mapper(row);
+    fieldValue = col.mapper(row);
   } else if (typeof col.mapper === 'string') {
-    v = getValueByPath(col.mapper, row);
+    fieldValue = getValueByPath(col.mapper, row);
   } else {
-    v = getValueByPath(col.field, row);
+    fieldValue = getValueByPath(col.field, row);
   }
   if (col.filter) {
     const fn = filters.getByName(col.filter);
-    return fn(v);
+    return fn(fieldValue);
   }
-  return v ?? '-';
+  switch (col.type) {
+    case 'boolean':
+      fieldValue = fieldValue
+        ? `<div style="background-color: #6ccd07; border-radius: 50%; width: 15px; height: 15px; margin: 0 auto;"/>`
+        : `<div style="background-color: #cecece; border-radius: 50%; width: 15px; height: 15px; margin: 0 auto;"/>`;
+      break;
+    case 'date':
+    case 'datetime':
+    case 'user':
+    case 'group':
+    case 'role':
+    case 'mobile':
+    case 'domain':
+    case 'resource':
+    case 'workspace':
+    case 'apiKey':
+      fieldValue = filters.getByName(col.type)(fieldValue);
+      break;
+  }
+  return fieldValue ?? '-';
 }
 
 function load() {
