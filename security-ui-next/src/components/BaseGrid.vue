@@ -3,10 +3,21 @@
     class="base-grid bg-white border rounded"
   >
     <template #header v-if="hasHear">
-      <div class="flex flex-row flex-wrap w-full p-2">
+      <div class="flex flex-row flex-wrap items-center w-full p-2">
         <div class="flex-1"> {{ title }}</div>
         <div class="flex-1">
           <slot name="header"></slot>
+        </div>
+        <div class="mx-1">
+          <label class="border rounded px-2 py-0.5 text-normal">
+            <input
+              type="search"
+              class="outline-0"
+              placeholder="جستجو ..."
+              v-model="filterState.search"
+              @keydown.enter="load"
+            >
+          </label>
         </div>
         <div class=" relative" v-if="filterState.showFilter">
           <button
@@ -172,7 +183,7 @@ interface IProps {
   selected?: Array<any>
   keyField?: string,
   title?: string,
-  search?: string,
+  searchable?: boolean,
   filter?: Array<any>
   multiple?: boolean
   loading?: boolean | number,
@@ -276,6 +287,7 @@ const filterState = reactive({
   dialog: false,
   showFilter: filterCols.value.length > 0,
   filters: [] as Array<Array<any>>,
+  search: undefined,
 });
 
 const tableWidth = computed(() => {
@@ -380,7 +392,7 @@ function load() {
 
   const payload: IGridLoadEventParams = {
     page: pagination.currentPage.value,
-    search: props.search,
+    search: filterState.search,
     filter: filterState.filters,
     totalRecords: props.totalRecords,
     from,
@@ -416,10 +428,6 @@ function changePage(page: number | string) {
   load();
 }
 
-function openFilterDialog() {
-  filterState.dialog = true;
-}
-
 function closeFilterDialog() {
   filterState.dialog = false;
 }
@@ -440,6 +448,11 @@ function doFilter() {
 function clearFilter() {
   filterCols.value.forEach(x => x.value = undefined);
   filterState.isAnd = true;
+  doFilter();
+}
+
+function clearSearch() {
+  filterState.search = undefined;
   doFilter();
 }
 </script>

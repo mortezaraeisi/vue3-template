@@ -5,6 +5,7 @@
   >
     <base-grid
       key-field="NidUser"
+      searchable
       :columns="columns"
       :total-records="state.totalRecords"
       v-model="state.list"
