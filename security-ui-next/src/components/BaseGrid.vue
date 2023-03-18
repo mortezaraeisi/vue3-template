@@ -5,10 +5,10 @@
     <template #header v-if="hasHear">
       <div class="flex flex-row flex-wrap items-center w-full p-2">
         <div class="flex-1"> {{ title }}</div>
-        <div class="flex-1">
-          <slot name="header"></slot>
+        <div class="mx-1 flex-1">
+          <slot name="head"></slot>
         </div>
-        <div class="mx-1">
+        <div class="mx-1" v-if="searchable">
           <label class="border rounded px-2 py-0.5 text-normal">
             <input
               type="search"
@@ -19,10 +19,11 @@
             >
           </label>
         </div>
-        <div class=" relative" v-if="filterState.showFilter">
+        <div class="relative" v-if="filterState.showFilter">
           <button
             style="border-radius: 50%; height: 22px; width: 22px;"
-            class="bg-primary text-white hover:bg-white hover:text-primary hover:outline-1 transition-all"
+            class="bg-primary text-white hover:bg-white hover:text-primary hover:shadow transition-all"
+            title="فیلتر پیشرفته"
             @click="toggleFilterDialog"
           >
             <base-icon name="fa-filter" class="text-xs"/>
@@ -80,6 +81,39 @@
               />
             </div>
           </div>
+        </div>
+        <div class="mx-1">
+          <slot name="tools"></slot>
+        </div>
+        <div class="mx-1" v-if="addable">
+          <button
+            style="border-radius: 50%; height: 22px; width: 22px;"
+            class="bg-primary text-white hover:bg-white hover:text-primary hover:shadow transition-all"
+            title="افزودن"
+            @click="add"
+          >
+            <base-icon name="fa-plus" class="text-xs"/>
+          </button>
+        </div>
+        <div class="mx-1" v-if="exportable">
+          <button
+            style="border-radius: 50%; height: 22px; width: 22px;"
+            class="bg-primary text-white hover:bg-white hover:text-primary hover:shadow transition-all"
+            title="دریافت فایل"
+            @click="download"
+          >
+            <base-icon name="fa-download" class="text-xs"/>
+          </button>
+        </div>
+        <div class="mx-1" v-if="importable">
+          <button
+            style="border-radius: 50%; height: 22px; width: 22px;"
+            class="bg-primary text-white hover:bg-white hover:text-primary hover:shadow transition-all"
+            title="بارگذاری از فایل"
+            @click="upload"
+          >
+            <base-icon name="fa-upload" class="text-xs"/>
+          </button>
         </div>
       </div>
     </template>
@@ -184,6 +218,9 @@ interface IProps {
   keyField?: string,
   title?: string,
   searchable?: boolean,
+  exportable?: boolean,
+  importable?: boolean,
+  addable?: boolean,
   filter?: Array<any>
   multiple?: boolean
   loading?: boolean | number,
@@ -197,6 +234,10 @@ interface IProps {
 
 const props = withDefaults(defineProps<IProps>(), {
   multiple: false,
+  addable: false,
+  searchable: false,
+  importable: false,
+  exportable: false,
   totalRecords: 0,
   recordPerPage: 0,
   switchCount: 7,
@@ -204,7 +245,7 @@ const props = withDefaults(defineProps<IProps>(), {
   doNotShowLoading: false,
   sortMultipleColumn: false,
 });
-const emits = defineEmits([ 'load', 'update:selected' ]);
+const emits = defineEmits([ 'load', 'update:selected', 'download', 'upload', 'add' ]);
 const operands = [
   {
     key: 'in',
@@ -451,10 +492,18 @@ function clearFilter() {
   doFilter();
 }
 
-function clearSearch() {
-  filterState.search = undefined;
-  doFilter();
+function download() {
+  emits('download');
 }
+
+function upload() {
+  emits('upload');
+}
+
+function add() {
+  emits('add');
+}
+
 </script>
 
 <style lang="scss">

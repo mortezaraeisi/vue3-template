@@ -5,7 +5,10 @@
   >
     <base-grid
       key-field="NidUser"
+      addable
       searchable
+      exportable
+      importable
       :columns="columns"
       :total-records="state.totalRecords"
       v-model="state.list"
