@@ -14,6 +14,8 @@
       v-model="state.list"
       v-model:selected="state.selected"
       @load="load"
+      @add="add"
+      @download="download"
       @update:selected="selectedRow"
     />
   </base-page>
@@ -237,6 +239,33 @@ async function load(opt: IGridLoadEventParams) {
     }
     state.list = dd.list;
     state.totalRecords = dd.total;
+  } catch (e) {
+    logger.catchError(e);
+  } finally {
+    state.loading = false;
+  }
+}
+
+async function add() {
+  try {
+    state.loading = true;
+    await router.push({ name: 'UserInfo', params: { id: 0 } });
+  } catch (e) {
+    logger.catchError(e);
+  } finally {
+    state.loading = false;
+  }
+}
+
+async function download(opt: IGridLoadEventParams) {
+  try {
+    state.loading = true;
+    await api.download('/v2/users/user-list', {
+      search: opt.search,
+      filter: opt.filter,
+      populate: true,
+      banned: route.query.banned ? true : undefined,
+    }, 'users-list.xlsx');
   } catch (e) {
     logger.catchError(e);
   } finally {
