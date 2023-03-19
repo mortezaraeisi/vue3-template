@@ -1,11 +1,12 @@
 <template xmlns:div="http://www.w3.org/1999/html">
   <base-layout :loading="state.loadingCount">
-    <div class="w-full grid grid-cols-8 gap-4">
+    <div class="w-full grid grid-cols-8 gap-2">
       <div class="col-span-full md:col-span-3 lg:col-span-5">
         <base-grid
+          searchable
           style="height: 82vh"
           key-field="NidUser"
-          title="انتخاب کاربر"
+          title="انتخاب کاربر جایگزین"
           :total-records="state.usersTotalRecords"
           :columns="usersColumns"
           v-model="state.usersList"
@@ -13,9 +14,9 @@
           @load="load"
         />
       </div>
-      <div class="flex flex-col col-span-full md:col-span-5 lg:col-span-3 bg-white rounded p-4">
+      <div class="flex flex-col col-span-full md:col-span-5 lg:col-span-3 bg-white border rounded p-2">
         <div class="mb-2">
-          افزودن جانشین
+          تنظیم زمان جانشین
         </div>
         <base-form
           class="grid grid-cols-1 gap-4 my-2"
@@ -57,7 +58,7 @@
           hide-pagination
           class="h-48 md:h-full mt-4"
           key-field="NidSubstitute"
-          title="لیست کاربران جانشین شده"
+          title="لیست کاربران جانشین شده از قبل"
           :columns="histColumns"
           :total-records="state.histTotalRecords"
           v-model="state.histList"
@@ -91,7 +92,6 @@ const usersColumns: Array<IGridColumn> = [
     field: 'img',
     title: 'تصویر',
     width: 70,
-    cell: 'base-user',
   },
   {
     field: 'username',
@@ -102,50 +102,64 @@ const usersColumns: Array<IGridColumn> = [
       justifyContent: 'start',
     },
     sortable: true,
+    filterable: true,
   },
   {
     field: 'firstName',
     title: 'نام',
     width: 120,
     sortable: true,
+    filterable: true,
   },
   {
     field: 'lastName',
     title: 'نام خانوادگی',
     width: 120,
     sortable: true,
+    filterable: true,
+  },
+  {
+    field: 'enabled',
+    title: 'فعال',
+    width: 80,
+    type: 'boolean',
+    filterable: true,
   },
   {
     field: 'email',
     title: 'ایمیل',
     width: 180,
+    filterable: true,
   },
   {
-    field: 'jobLocation',
+    field: 'jobLocation.name',
     title: 'محل خدمت',
     width: 200,
-    mapper: 'jobLocation.name',
   },
   {
     field: 'IDNumber',
     title: 'کد ملی',
     width: 150,
+    filterable: true,
   },
   {
     field: 'tel',
     title: 'تلفن',
     width: 200,
+    filterable: true,
   },
   {
     field: 'mobile',
     title: 'تلفن همراه',
     width: 200,
     filter: 'mobile',
+    filterable: true,
   },
   {
     field: 'fatherName',
     title: 'نام پدر',
     width: 200,
+    filterable: true,
   },
 ];
 const histColumns: Array<IGridColumn> = [
@@ -240,6 +254,7 @@ async function load(opt: IGridLoadEventParams) {
       from: opt.from,
       to: opt.to,
       search: opt.search,
+      filter: opt.filter,
     });
     if (hasError) {
       return;
